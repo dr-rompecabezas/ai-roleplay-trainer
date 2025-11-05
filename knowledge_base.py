@@ -6,7 +6,6 @@ Uses ChromaDB to store and retrieve training knowledge across 4 collections
 
 import chromadb
 from chromadb.api.types import EmbeddingFunction
-from typing import List, Dict, Optional
 import hashlib
 import re
 
@@ -17,20 +16,20 @@ class SimpleEmbeddingFunction(EmbeddingFunction):
     Uses a combination of character n-grams and word hashing for basic semantic similarity.
     """
 
-    def __call__(self, input: List[str]) -> List[List[float]]:
+    def __call__(self, input: list[str]) -> list[list[float]]:
         """Generate embeddings for a list of texts"""
         embeddings = []
         for text in input:
             embeddings.append(self._embed_text(text))
         return embeddings
 
-    def _embed_text(self, text: str, dim: int = 384) -> List[float]:
+    def _embed_text(self, text: str, dim: int = 384) -> list[float]:
         """
         Create a simple embedding vector for text.
         Uses word and character n-gram features with hashing.
         """
         text = text.lower()
-        words = re.findall(r'\w+', text)
+        words = re.findall(r"\w+", text)
 
         # Initialize embedding vector
         embedding = [0.0] * dim
@@ -38,13 +37,14 @@ class SimpleEmbeddingFunction(EmbeddingFunction):
         # Add word-level features
         for word in words:
             # Hash each word to multiple dimensions
+            # Note: MD5 used for non-cryptographic feature hashing only
             hash_val = int(hashlib.md5(word.encode()).hexdigest(), 16)
             idx = hash_val % dim
             embedding[idx] += 1.0
 
             # Add character trigrams for partial matching
             for i in range(len(word) - 2):
-                trigram = word[i:i+3]
+                trigram = word[i : i + 3]
                 hash_val = int(hashlib.md5(trigram.encode()).hexdigest(), 16)
                 idx = hash_val % dim
                 embedding[idx] += 0.3
@@ -75,20 +75,16 @@ class TrainingKnowledgeBase:
 
         # Create 4 collections for different query types
         self.company_knowledge = self.client.get_or_create_collection(
-            "company_knowledge",
-            embedding_function=self.embedding_function
+            "company_knowledge", embedding_function=self.embedding_function
         )
         self.policies = self.client.get_or_create_collection(
-            "policies",
-            embedding_function=self.embedding_function
+            "policies", embedding_function=self.embedding_function
         )
         self.customer_behaviors = self.client.get_or_create_collection(
-            "customer_behaviors",
-            embedding_function=self.embedding_function
+            "customer_behaviors", embedding_function=self.embedding_function
         )
         self.coaching_tips = self.client.get_or_create_collection(
-            "coaching_tips",
-            embedding_function=self.embedding_function
+            "coaching_tips", embedding_function=self.embedding_function
         )
 
         # Load all knowledge into collections
@@ -102,25 +98,21 @@ class TrainingKnowledgeBase:
             self.client.delete_collection("policies")
             self.client.delete_collection("customer_behaviors")
             self.client.delete_collection("coaching_tips")
-        except:
+        except Exception:
             pass
 
         # Recreate collections
         self.company_knowledge = self.client.create_collection(
-            "company_knowledge",
-            embedding_function=self.embedding_function
+            "company_knowledge", embedding_function=self.embedding_function
         )
         self.policies = self.client.create_collection(
-            "policies",
-            embedding_function=self.embedding_function
+            "policies", embedding_function=self.embedding_function
         )
         self.customer_behaviors = self.client.create_collection(
-            "customer_behaviors",
-            embedding_function=self.embedding_function
+            "customer_behaviors", embedding_function=self.embedding_function
         )
         self.coaching_tips = self.client.create_collection(
-            "coaching_tips",
-            embedding_function=self.embedding_function
+            "coaching_tips", embedding_function=self.embedding_function
         )
 
         # Load data into each collection
@@ -560,9 +552,7 @@ class TrainingKnowledgeBase:
 
     # Retrieval Interface Methods
 
-    def retrieve_company_facts(
-        self, query: str, n_results: int = 3
-    ) -> List[str]:
+    def retrieve_company_facts(self, query: str, n_results: int = 3) -> list[str]:
         """
         For reference questions: 'What does Plus Enhancement include?'
 
@@ -573,14 +563,12 @@ class TrainingKnowledgeBase:
         Returns:
             List of relevant company facts
         """
-        results = self.company_knowledge.query(
-            query_texts=[query], n_results=n_results
-        )
+        results = self.company_knowledge.query(query_texts=[query], n_results=n_results)
         return results["documents"][0] if results["documents"] else []
 
     def retrieve_policies(
-        self, query: str, filter_metadata: Dict = None, n_results: int = 3
-    ) -> List[Dict]:
+        self, query: str, filter_metadata: dict = None, n_results: int = 3
+    ) -> list[dict]:
         """
         For validation: 'Can I offer a refund?'
         Returns both content and metadata
@@ -610,7 +598,7 @@ class TrainingKnowledgeBase:
 
     def retrieve_customer_behaviors(
         self, emotion: str, intensity: str = None
-    ) -> List[str]:
+    ) -> list[str]:
         """
         For customer simulation: 'How does frustrated customer act?'
 
@@ -623,12 +611,7 @@ class TrainingKnowledgeBase:
         """
         # Build where filter using ChromaDB's $and operator for multiple conditions
         if intensity:
-            where_filter = {
-                "$and": [
-                    {"emotion": emotion},
-                    {"intensity": intensity}
-                ]
-            }
+            where_filter = {"$and": [{"emotion": emotion}, {"intensity": intensity}]}
         else:
             where_filter = {"emotion": emotion}
 
@@ -641,7 +624,7 @@ class TrainingKnowledgeBase:
 
     def retrieve_coaching_tips(
         self, situation: str, category: str = None, n_results: int = 3
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         For coaching: 'How to handle escalating customer?'
 
@@ -666,7 +649,7 @@ class TrainingKnowledgeBase:
             for doc, meta in zip(results["documents"][0], results["metadatas"][0])
         ]
 
-    def get_scenario_briefing(self) -> Dict[str, List[str]]:
+    def get_scenario_briefing(self) -> dict[str, list[str]]:
         """
         Generate comprehensive scenario briefing using RAG retrieval
 

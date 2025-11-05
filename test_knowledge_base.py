@@ -45,9 +45,7 @@ def test_retrieval_quality():
 
     # Test 4: Company knowledge retrieval
     print("Test 4: Company knowledge retrieval")
-    facts = kb.retrieve_company_facts(
-        "TechFlow Plus Enhancement benefits features"
-    )
+    facts = kb.retrieve_company_facts("TechFlow Plus Enhancement benefits features")
     assert len(facts) > 0, "No company facts found"
     print("✅ Company knowledge retrieval works")
     print(f"   Found {len(facts)} relevant facts")
@@ -100,10 +98,7 @@ def test_specific_queries():
     policies = kb.retrieve_policies(
         "representative authority",
         filter_metadata={
-            "$and": [
-                {"authority_level": "tier1"},
-                {"requires_approval": "false"}
-            ]
+            "$and": [{"authority_level": "tier1"}, {"requires_approval": "false"}]
         },
     )
     print(f"Found {len(policies)} policies:")
@@ -121,7 +116,9 @@ def test_specific_queries():
 
     # Use case 3: What's included in TechFlow Plus?
     print("Use Case 3: What's included in TechFlow Plus Enhancement?")
-    features = kb.retrieve_company_facts("TechFlow Plus Enhancement features", n_results=5)
+    features = kb.retrieve_company_facts(
+        "TechFlow Plus Enhancement features", n_results=5
+    )
     print(f"Found {len(features)} features:")
     for feature in features:
         print(f"- {feature}")

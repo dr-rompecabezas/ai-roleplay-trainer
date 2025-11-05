@@ -4,7 +4,6 @@ Customer Service Training CLI Prototype
 A simple CLI tool to practice customer service skills with AI roleplay
 """
 
-import os
 import argparse
 from llm_providers import create_provider
 from knowledge_base import TrainingKnowledgeBase
@@ -153,7 +152,8 @@ class CustomerServiceTrainer:
         # Enhancement Benefits - Retrieved from KB
         print(f"\n✨ ENHANCEMENT BENEFITS:")
         benefits = self.knowledge_base.retrieve_company_facts(
-            "TechFlow Plus Enhancement features benefits support channels speed", n_results=5
+            "TechFlow Plus Enhancement features benefits support channels speed",
+            n_results=5,
         )
         for benefit in benefits:
             print(f"  • {benefit}")
@@ -165,7 +165,7 @@ class CustomerServiceTrainer:
         )
         for policy in policies:
             # Extract the key action from metadata
-            action = policy['metadata'].get('action', 'policy')
+            action = policy["metadata"].get("action", "policy")
             print(f"  • {action.title()}: {policy['content'][:100]}...")
 
         # Customer Details
@@ -360,7 +360,7 @@ class CustomerServiceTrainer:
             "removal refund retention", n_results=3
         )
         for policy in policies:
-            action = policy['metadata'].get('action', 'policy')
+            action = policy["metadata"].get("action", "policy")
             print(f"  • {action.title()}: {policy['content'][:80]}...")
 
         print("=" * 50)

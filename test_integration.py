@@ -5,12 +5,12 @@ Tests that the knowledge base integrates correctly without needing API keys
 """
 
 import os
-import sys
 
 # Set a dummy API key to prevent initialization errors
-os.environ['ANTHROPIC_API_KEY'] = 'dummy-key-for-testing'
+os.environ["ANTHROPIC_API_KEY"] = "dummy-key-for-testing"
 
 from main import CustomerServiceTrainer
+
 
 def test_integration():
     """Test that the trainer initializes with knowledge base"""
@@ -56,6 +56,7 @@ def test_integration():
     print("  • Show product features and benefits")
     print("  • Present policies and representative authority")
     print("  • Provide coaching tips")
+
 
 if __name__ == "__main__":
     test_integration()
