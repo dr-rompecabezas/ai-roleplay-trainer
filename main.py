@@ -23,44 +23,11 @@ class CustomerServiceTrainer:
         self.knowledge_base = TrainingKnowledgeBase()
         print("Knowledge base ready!")
 
-        # Scenario setup with comprehensive briefing
+        # Scenario setup - company info now comes from knowledge base
         self.scenario = {
             "title": "Billing Dispute - Service Enhancement Fee",
-            "company_briefing": {
-                "company_name": "TechFlow Communications",
-                "your_role": "Customer Service Representative - Tier 1 Support",
-                "company_overview": """
-                    TechFlow Communications provides internet, phone, and TV bundle services to residential customers.
-                    We pride ourselves on reliable service and customer satisfaction.
-                    Founded in 2018, we serve over 50,000 customers across the metropolitan area.
-                """,
-                "services": {
-                    "internet": "High-speed fiber internet (100Mbps - 1Gbps plans)",
-                    "phone": "Unlimited local and long-distance calling",
-                    "tv": "200+ channels including premium networks",
-                    "bundles": "Discounted packages combining 2-3 services",
-                },
-                "service_enhancement_package": {
-                    "name": "TechFlow Plus Enhancement",
-                    "cost": "$45/month",
-                    "when_applied": "Automatically after initial 2-year contract expires",
-                    "disclosure": "Mentioned in original contract fine print (Section 12.3)",
-                    "benefits": [
-                        "Priority customer support (24/7 dedicated line)",
-                        "Free premium channels (HBO, Showtime, Sports packages)",
-                        "Internet speed boost (+50% faster)",
-                        "Free tech support visits (normally $75 each)",
-                        "No early termination fees if you want to cancel service",
-                    ],
-                    "value": "Regular price would be $89/month for these features separately",
-                },
-                "policies": {
-                    "fee_removal": "Enhancement can be removed with 30-day written notice",
-                    "refunds": "Can refund current month if removed within 15 days of billing",
-                    "escalation": "Escalate to supervisor if customer requests cancellation of entire service",
-                    "retention_offers": "Can offer 50% discount on enhancement fee for 3 months as retention",
-                },
-            },
+            "company_name": "TechFlow Communications",
+            "your_role": "Customer Service Representative - Tier 1 Support",
             "customer_background": {
                 "name": "Sarah Chen",
                 "account_details": {
@@ -115,7 +82,6 @@ class CustomerServiceTrainer:
 
     def display_briefing(self):
         """Display comprehensive scenario briefing using RAG retrieval"""
-        briefing = self.scenario["company_briefing"]
         customer = self.scenario["customer_background"]
 
         print("=" * 80)
@@ -123,8 +89,8 @@ class CustomerServiceTrainer:
         print("=" * 80)
 
         # Company Overview
-        print(f"\n🏢 COMPANY: {briefing['company_name']}")
-        print(f"YOUR ROLE: {briefing['your_role']}")
+        print(f"\n🏢 COMPANY: {self.scenario['company_name']}")
+        print(f"YOUR ROLE: {self.scenario['your_role']}")
 
         # Retrieve company info from knowledge base
         company_info = self.knowledge_base.retrieve_company_facts(
@@ -341,11 +307,10 @@ class CustomerServiceTrainer:
             print("No active scenario. Start a scenario first.")
             return
 
-        briefing = self.scenario["company_briefing"]
         print("\n" + "=" * 50)
         print("QUICK REFERENCE")
         print("=" * 50)
-        print(f"Company: {briefing['company_name']}")
+        print(f"Company: {self.scenario['company_name']}")
 
         # Get enhancement info from KB
         enhancement_info = self.knowledge_base.retrieve_company_facts(
