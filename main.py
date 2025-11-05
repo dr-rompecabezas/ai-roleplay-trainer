@@ -7,6 +7,7 @@ A simple CLI tool to practice customer service skills with AI roleplay
 import os
 import argparse
 from llm_providers import create_provider
+from knowledge_base import TrainingKnowledgeBase
 
 
 class CustomerServiceTrainer:
@@ -17,6 +18,11 @@ class CustomerServiceTrainer:
 
         # Initialize LLM provider
         self.llm_provider = create_provider(provider)
+
+        # Initialize RAG knowledge base
+        print("Initializing knowledge base...")
+        self.knowledge_base = TrainingKnowledgeBase()
+        print("Knowledge base ready!")
 
         # Scenario setup with comprehensive briefing
         self.scenario = {
@@ -109,7 +115,7 @@ class CustomerServiceTrainer:
         return self.llm_provider.make_call(messages, max_tokens)
 
     def display_briefing(self):
-        """Display comprehensive scenario briefing"""
+        """Display comprehensive scenario briefing using RAG retrieval"""
         briefing = self.scenario["company_briefing"]
         customer = self.scenario["customer_background"]
 
@@ -120,33 +126,47 @@ class CustomerServiceTrainer:
         # Company Overview
         print(f"\n🏢 COMPANY: {briefing['company_name']}")
         print(f"YOUR ROLE: {briefing['your_role']}")
-        print(briefing["company_overview"].strip())
 
-        # Services Overview
+        # Retrieve company info from knowledge base
+        company_info = self.knowledge_base.retrieve_company_facts(
+            "TechFlow Communications company background", n_results=2
+        )
+        for info in company_info:
+            print(f"  • {info}")
+
+        # Services Overview - Retrieved from KB
         print(f"\n📋 OUR SERVICES:")
-        for service, description in briefing["services"].items():
-            print(f"  • {service.title()}: {description}")
+        services_info = self.knowledge_base.retrieve_company_facts(
+            "TechFlow Communications services internet phone TV bundles", n_results=4
+        )
+        for service in services_info:
+            print(f"  • {service}")
 
-        # The Specific Issue
+        # The Specific Issue - Retrieved from KB
         print(f"\n⚠️  THE SERVICE ENHANCEMENT FEE:")
-        enhancement = briefing["service_enhancement_package"]
-        print(f"  • Package: {enhancement['name']}")
-        print(f"  • Cost: {enhancement['cost']}")
-        print(f"  • Applied: {enhancement['when_applied']}")
-        print(f"  • Legal Basis: {enhancement['disclosure']}")
-        print(f"  • Regular Value: {enhancement['value']}")
+        enhancement_info = self.knowledge_base.retrieve_company_facts(
+            "TechFlow Plus Enhancement pricing cost value", n_results=1
+        )
+        if enhancement_info:
+            print(f"  • {enhancement_info[0]}")
 
+        # Enhancement Benefits - Retrieved from KB
         print(f"\n✨ ENHANCEMENT BENEFITS:")
-        for benefit in enhancement["benefits"]:
+        benefits = self.knowledge_base.retrieve_company_facts(
+            "TechFlow Plus Enhancement features benefits support channels speed", n_results=5
+        )
+        for benefit in benefits:
             print(f"  • {benefit}")
 
-        # Your Policies & Powers
+        # Your Policies & Powers - Retrieved from KB
         print(f"\n📋 YOUR POLICIES & AUTHORITY:")
-        policies = briefing["policies"]
-        print(f"  • Removal: {policies['fee_removal']}")
-        print(f"  • Refunds: {policies['refunds']}")
-        print(f"  • Escalation: {policies['escalation']}")
-        print(f"  • Retention: {policies['retention_offers']}")
+        policies = self.knowledge_base.retrieve_policies(
+            "representative authority removal refund retention escalation", n_results=5
+        )
+        for policy in policies:
+            # Extract the key action from metadata
+            action = policy['metadata'].get('action', 'policy')
+            print(f"  • {action.title()}: {policy['content'][:100]}...")
 
         # Customer Details
         print(f"\n👤 CUSTOMER: {customer['name']}")
@@ -168,6 +188,14 @@ class CustomerServiceTrainer:
         print(f"  • Ideal: {success['ideal_outcome']}")
         print(f"  • Acceptable: {success['acceptable_outcome']}")
         print(f"  • Escalate if: {success['escalation_needed']}")
+
+        # Coaching Tips - Retrieved from KB
+        print(f"\n💡 COACHING TIPS:")
+        tips = self.knowledge_base.retrieve_coaching_tips(
+            "customer service best practices empathy communication", n_results=3
+        )
+        for tip in tips[:3]:
+            print(f"  • {tip['content'][:100]}...")
 
         print("\n" + "=" * 80)
         print("Take time to review this information before starting the roleplay.")
@@ -308,7 +336,7 @@ class CustomerServiceTrainer:
         return customer_response
 
     def show_quick_reference(self):
-        """Show condensed reference during active scenario"""
+        """Show condensed reference during active scenario using RAG"""
         if not self.scenario_active:
             print("No active scenario. Start a scenario first.")
             return
@@ -318,13 +346,23 @@ class CustomerServiceTrainer:
         print("QUICK REFERENCE")
         print("=" * 50)
         print(f"Company: {briefing['company_name']}")
-        print(
-            f"Enhancement: {briefing['service_enhancement_package']['name']} - {briefing['service_enhancement_package']['cost']}"
+
+        # Get enhancement info from KB
+        enhancement_info = self.knowledge_base.retrieve_company_facts(
+            "TechFlow Plus Enhancement cost pricing", n_results=1
         )
-        print(f"Value: {briefing['service_enhancement_package']['value']}")
-        print(f"Can Remove: {briefing['policies']['fee_removal']}")
-        print(f"Can Refund: {briefing['policies']['refunds']}")
-        print(f"Retention Offer: {briefing['policies']['retention_offers']}")
+        if enhancement_info:
+            print(f"Enhancement: {enhancement_info[0]}")
+
+        # Get key policies from KB
+        print("\nKey Policies:")
+        policies = self.knowledge_base.retrieve_policies(
+            "removal refund retention", n_results=3
+        )
+        for policy in policies:
+            action = policy['metadata'].get('action', 'policy')
+            print(f"  • {action.title()}: {policy['content'][:80]}...")
+
         print("=" * 50)
 
     def toggle_coaching(self):
