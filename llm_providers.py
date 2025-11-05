@@ -6,14 +6,13 @@ Provides a common interface for different LLM APIs (OpenAI, Anthropic, etc.)
 
 import os
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
 
 
 class LLMProvider(ABC):
     """Abstract base class for LLM providers"""
 
     @abstractmethod
-    def make_call(self, messages: List[Dict[str, str]], max_tokens: int = 1000) -> str:
+    def make_call(self, messages: list[dict[str, str]], max_tokens: int = 1000) -> str:
         """Make a call to the LLM API
 
         Args:
@@ -35,7 +34,7 @@ class AnthropicProvider(LLMProvider):
         self.client = anthropic.Anthropic()
         self.model = "claude-sonnet-4-20250514"
 
-    def make_call(self, messages: List[Dict[str, str]], max_tokens: int = 1000) -> str:
+    def make_call(self, messages: list[dict[str, str]], max_tokens: int = 1000) -> str:
         """Make a call to Anthropic's API"""
         try:
             response = self.client.messages.create(
@@ -60,7 +59,7 @@ class OpenAIProvider(LLMProvider):
         self.client = OpenAI()
         self.model = "gpt-5"
 
-    def make_call(self, messages: List[Dict[str, str]], max_tokens: int = 1000) -> str:
+    def make_call(self, messages: list[dict[str, str]], max_tokens: int = 1000) -> str:
         """Make a call to OpenAI's API using the responses endpoint"""
         try:
             # Convert conversation to a single input string for the responses API
@@ -79,7 +78,7 @@ class OpenAIProvider(LLMProvider):
         except Exception as e:
             return f"Error making OpenAI API call: {str(e)}"
 
-    def _messages_to_text(self, messages: List[Dict[str, str]]) -> str:
+    def _messages_to_text(self, messages: list[dict[str, str]]) -> str:
         """Convert message history to a single text input for OpenAI responses API"""
         text_parts = []
         for msg in messages:
